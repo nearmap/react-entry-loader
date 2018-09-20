@@ -1,0 +1,11 @@
+{
+  "plugins": {
+    "remark-lint": {
+      "list-item-indent": false,
+      "list-item-spacing": false,
+      "no-consecutive-blank-lines": false,
+      "no-literal-urls": false,
+      "maximum-line-length": 80
+    }
+  }
+}
