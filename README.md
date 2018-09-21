@@ -54,10 +54,10 @@ const Html = ({scripts, styles})=> (
     <head>
       <title>Page 1</title>
       <Styles files={styles} />
-      <Scripts files={scripts} />
+      <Scripts files={scripts} async />
     </head>
     <body className={theme.body}>
-      <Renderer id="page1-app">
+      <Renderer id="page1-app" className={theme.root}>
         <App />
       </Renderer>
     </body>

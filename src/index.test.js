@@ -34,12 +34,12 @@ describe('loader and plugin', ()=> {
         <head>
           <title>Page 1</title>
           <link href="page1.css" rel="stylesheet"/>
-          <script type="text/javascript" async="" src="runtime.js"></script>
-          <script type="text/javascript" async="" src="shared.js"></script>
-          <script type="text/javascript" async="" src="page1.js"></script>
+          <script type="text/javascript" src="runtime.js" async=""></script>
+          <script type="text/javascript" src="shared.js" async=""></script>
+          <script type="text/javascript" src="page1.js" async=""></script>
         </head>
-        <body class="page1_body_1Zohn">
-          <div id="page1-app"></div>
+        <body>
+          <div id="page1-app" class="page1_root_z9qiR"></div>
         </body>
       </html>
     `);
@@ -50,13 +50,13 @@ describe('loader and plugin', ()=> {
       <html>
         <head>
           <title>Page 2</title>
-          <script type="text/javascript" async="" src="runtime.js"></script>
-          <script type="text/javascript" async="" src="shared.js"></script>
-          <script type="text/javascript" async="" src="page2.js"></script>
         </head>
         <body>
           <div>rendered at compile time for page 2</div>
           <div id="page2-app"></div>
+          <script type="text/javascript" src="runtime.js"></script>
+          <script type="text/javascript" src="shared.js"></script>
+          <script type="text/javascript" src="page2.js"></script>
         </body>
       </html>
     `);

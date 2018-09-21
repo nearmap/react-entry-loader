@@ -11,13 +11,13 @@ const Html = ({scripts, styles})=> (
     <head>
       <title>Page 2</title>
       <Styles files={styles} />
-      <Scripts files={scripts} />
     </head>
     <body>
       <Header page={2} />
       <Renderer id="page2-app">
         <App />
       </Renderer>
+      <Scripts files={scripts} />
     </body>
   </html>
 );
