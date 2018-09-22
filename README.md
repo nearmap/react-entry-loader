@@ -76,7 +76,7 @@ is treated as the webpack entry module code, as is the code being called in `onL
 The entry module code will be extracted along with the `some-render-or-init-function`.
 The latter should be a function with the interface `render(...children)` that
 renders the `children` into the DOM at run-time.
-You can use [react-entry-loader/render](./src/render)'s `render(elementId)` or `hydrate(elementId)` render function factories for this or write your own.
+You can use [react-entry-loader/render](./src/render.js)'s `render(elementId)` or `hydrate(elementId)` render function factories for this or write your own.
 
 Extracted Entry Module:
 ```js
@@ -125,7 +125,7 @@ the webpack compilation process to generate HTML assets.
 The final chunks that an entry module depends on will be passed as
 `scripts` and `styles` props to the template components.
 These can then be passed to the `<Scripts>` and `<Styles>` components that come
-with the [injectors](./src/injectors) module to reference the files in generated HTML.
+with the [injectors](./src/injectors.js) module to reference the files in generated HTML.
 
 
 ## Running the Examples
