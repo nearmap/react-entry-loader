@@ -17,7 +17,9 @@ export const Scripts = ({files, ...props})=> files.map(
 );
 
 
-/**
- * Render an application component container with the given `id`.
- */ // eslint-disable-next-line no-unused-vars
-export const Renderer = ({id, children, ...props})=> <div id={id} {...props} />;
+export const Module = ({hydratable, children})=> {
+  if (hydratable && children) {
+    return children;
+  }
+  return null;
+};

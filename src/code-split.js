@@ -1,8 +1,7 @@
-import {parseExpression, parse} from '@babel/parser';
+import {parse} from '@babel/parser';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
-import {callExpression, identifier, expressionStatement} from '@babel/types';
-import {importDeclaration, importSpecifier, stringLiteral} from '@babel/types';
+import {callExpression, expressionStatement} from '@babel/types';
 
 
 /**
@@ -11,22 +10,24 @@ import {importDeclaration, importSpecifier, stringLiteral} from '@babel/types';
  *
  * e.g.
  * ```
- * path.findParent(isSameAs(maybeParent));
+ * path.findParent(isAnyOf(maybeParent));
  * ```
  */
-const isSameAs = (expected)=> (item)=> item === expected;
+const isAnyOf = (...expected)=> (item)=> expected.includes(item);
 
 
 /**
  * Return a function `f(item)` that returns `true` if `item`
- * has a `parentPath` as a parent.
+ * has a any of `parentPaths` as a parent.
  *
  * e.g.
  * ```
- * [path1, path2].filter(hasParent(somePath));
+ * [path1, path2].filter(hasAnyParent(somePath));
  * ```
  */
-const hasParent = (parentPath)=> (path)=> path.findParent(isSameAs(parentPath));
+const hasAnyParent = (...parentPaths)=> (path)=> (
+  path.find(isAnyOf(...parentPaths))
+);
 
 
 /**
@@ -38,13 +39,18 @@ const isReactCreateComponent = (path)=> (
 
 
 /**
- * Return `true` if `path` is a `Renderer` or `Hydrator` injector component.
+ * Return `true` if `path` is a `Module` injector component.
  */
-const isInjector = (path)=> {
+const isModuleComponent = (path)=> {
+  // TODO: handle functions, and calls to them, local to the module file.
+  /* istanbul ignore else  */
   if (isReactCreateComponent(path)) {
     const [comp] = path.get('arguments');
-    return comp.referencesImport('react-entry-loader/injectors', 'Renderer');
+    return comp.referencesImport('react-entry-loader/injectors', 'Module');
   }
+  // TODO: we somehow never get here, maybe because we stop traversal
+  // when we have found the module component.
+  /* istanbul ignore next  */
   return false;
 };
 
@@ -54,54 +60,60 @@ const isAnyImportSpecifier = (path)=> (
 );
 
 
-/**
- * Yield all bindings referenced by `path`.
- *
- * This will walk from the `path`'s current scope covering all parent
- * scopes, finding any binding that `path` depends on.
- */
-function* getBindingsReferencedBy(path) {
+const bindingOnlyReferencedBy = ({referencePaths}, ...paths)=> (
+  referencePaths.every(hasAnyParent(...paths))
+);
+
+const bindingReferencesBy = ({referencePaths}, ...paths)=> (
+  referencePaths && referencePaths.some(hasAnyParent(...paths))
+);
+
+
+function* getAllBindings(path) {
   let scope = path.scope;
 
   while (scope) {
-    for (const [, binding] of Object.entries(scope.bindings)) {
-      if (binding.referencePaths.some(hasParent(path))) {
-        yield binding;
-      }
+    yield scope;
+    for (const binding of Object.values(scope.bindings)) {
+      yield binding;
     }
     scope = scope.parent;
   }
 }
 
+
 /**
- * Yield all paths that `path` depends on directly or inderectly.
+ * Yield all bindings referenced by `paths`.
+ *
+ * This will walk from each `paths` item's current scope covering all parent
+ * scopes, finding any binding that it depends on.
  */
-function* getDependentPaths(path) {
-  for (const binding of getBindingsReferencedBy(path)) {
-    const bindingPath = binding.path;
-    yield * getDependentPaths(bindingPath);
-    yield bindingPath;
+function* getBindingsReferencedBy(...paths) {
+  for (const path of paths) {
+    for (const binding of getAllBindings(path)) {
+      if (bindingReferencesBy(binding, path)) {
+        yield binding;
+      }
+    }
   }
 }
 
-
 /**
- * Return the container id from the
- * `<AppInjector id="foobar"><App /></AppInjector>`
- * given the `<App />`'s `injectedComponent`.
+ * Yield all paths that each `paths` item depends on directly or inderectly.
  */
-const getContainerId = (injectedComponent)=> {
-  const [, props] = injectedComponent.parent.arguments;
-  return props.properties[0].value.value;
-};
-
+function* getDependentPaths(...paths) {
+  for (const {path} of getBindingsReferencedBy(...paths)) {
+    yield * getDependentPaths(path);
+    yield path;
+  }
+}
 
 /**
  * Remove the `path` and its parents.
  * Only remove parent `ImportDeclarations` if `path` is the last
  * `ImportSpecifier`.
  */
-const removePath = (path)=> {
+const removePathAndMaybeParent = (path)=> {
   const {parentPath} = path;
 
   if (isAnyImportSpecifier(path) && parentPath.node.specifiers.length > 1) {
@@ -112,77 +124,95 @@ const removePath = (path)=> {
   parentPath.remove();
 };
 
+const removePaths = (...paths)=> {
+  for (const path of paths) {
+    path.remove();
+  }
+};
+
+
+const removeNonSharedBindings = (...paths)=> {
+  for (const binding of getBindingsReferencedBy(...paths)) {
+    if (bindingOnlyReferencedBy(binding, ...paths)) {
+      removePathAndMaybeParent(binding.path);
+    }
+  }
+};
+
 
 /**
- * Remove all paths from traversing `rootPath` that are not part of
- * any of the `requiredPaths`.
+ * Remove all paths from `rootPath` that are not used by `paths`.
  */
-const removeUnusedPaths = (rootPath, requiredPaths)=> {
-  rootPath.traverse({
-    ImportSpecifier(path) {
-      if (!requiredPaths.has(path)) {
-        removePath(path);
-      }
-    },
+const removeUnusedPaths = (rootPath, ...paths)=> {
+  const pathsToKeep = new Set(getDependentPaths(...paths));
 
-    ImportDefaultSpecifier(path) {
-      if (!requiredPaths.has(path)) {
-        removePath(path);
-      }
-    },
-
-    VariableDeclarator(path) {
-      if (!requiredPaths.has(path)) {
-        path.remove();
-      }
-    },
-
-    ExportDefaultDeclaration(path) {
-      path.remove();
+  const withMaybeParentRemover = (path)=> {
+    if (!pathsToKeep.has(path)) {
+      removePathAndMaybeParent(path);
     }
+  };
+
+  rootPath.traverse({
+    ImportSpecifier: withMaybeParentRemover,
+    ImportDefaultSpecifier: withMaybeParentRemover,
+    VariableDeclarator: withMaybeParentRemover,
+    ExportDefaultDeclaration: (path)=> path.remove()
   });
 };
 
 
 /**
- * Return the path of the component to be injected using an injector component.
+ * Return the path of the `<Module>` component.
  */
-const getInjectedComponent = (ast)=> {
-  let comp = null;
+const getModuleComponent = (ast)=> {
+  let moduleComponent = null;
 
   traverse(ast, {
     CallExpression(path) {
-      if (isReactCreateComponent(path) && isInjector(path.parentPath)) {
-        comp = path;
+      if (isModuleComponent(path)) {
+        moduleComponent = path;
+        path.stop();
       }
     }
   });
 
-  return comp;
+  return moduleComponent;
 };
+
+
+/**
+ * Return the props and children of a React component.
+ */
+const getProps = (component)=> {
+  const [, props, ...children] = component.get('arguments');
+
+  const result = {children};
+
+  for (const prop of props.get('properties')) {
+    result[prop.node.key.name] = prop.get('value');
+  }
+  return result;
+};
+
+
+const isHydratable = (hydratablePropPath)=> (
+  hydratablePropPath && hydratablePropPath.node.value
+);
 
 
 export const getModule = (source)=> {
   const ast = parse(source, {sourceType: 'module'});
-  const injectedComponent = getInjectedComponent(ast);
-  const id = getContainerId(injectedComponent);
 
-  const prog = injectedComponent.findParent((path)=> path.isProgram());
-  const requiredPaths = new Set(getDependentPaths(injectedComponent));
+  const moduleComponent = getModuleComponent(ast);
+  const {onLoad, children} = getProps(moduleComponent);
 
-  removeUnusedPaths(prog, requiredPaths);
+  const prog = moduleComponent.findParent((path)=> path.isProgram());
+  removeUnusedPaths(prog, onLoad, ...children);
 
   prog.pushContainer('body',
-    importDeclaration(
-      [importSpecifier(identifier('render'), identifier('render'))],
-      stringLiteral('react-dom')
+    expressionStatement(
+      callExpression(onLoad.node, children.map(({node})=> node))
     )
-  );
-  prog.pushContainer('body',
-    expressionStatement(callExpression(identifier('render'), [
-      injectedComponent.node,
-      parseExpression(`document.getElementById(${JSON.stringify(id)})`)
-    ]))
   );
 
   return generate(ast, {sourceMaps: false});
@@ -191,17 +221,17 @@ export const getModule = (source)=> {
 
 export const getTemplate = (source)=> {
   const ast = parse(source, {sourceType: 'module'});
-  const injectedComponent = getInjectedComponent(ast);
 
-  for (const binding of getBindingsReferencedBy(injectedComponent)) {
-    const onlyUsedByApp = binding.referencePaths.every(
-      (refPath)=> refPath.find(isSameAs(injectedComponent))
-    );
-    if (onlyUsedByApp) {
-      removePath(binding.path);
-    }
+  const moduleComponent = getModuleComponent(ast);
+  const {onLoad, hydratable, children} = getProps(moduleComponent);
+
+  removeNonSharedBindings(onLoad.parentPath);
+  removePaths(onLoad.parentPath);
+
+  if (!isHydratable(hydratable)) {
+    removeNonSharedBindings(...children);
+    removePaths(...children);
   }
-  injectedComponent.remove();
 
   return generate(ast, {sourceMaps: true}, source);
 };

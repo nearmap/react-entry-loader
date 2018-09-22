@@ -1,6 +1,6 @@
 # react-entry-loader
 
-Use a webpack entry module as a template to generate HTML assets.
+Use webpack entry modules as templates for generating HTML assets.
 
 
 ## Installation
@@ -16,8 +16,8 @@ You need to include a single [ReactEntryLoaderPlugin](./src/plugin.js) in your
 webpack config to handle the HTML asset generation.
 
 The loader itself can be used like any other loader in webpack.
-There is a little [helper function](./src/entry.js) for defining an entry modules,
-which makes it a bit more readable than using strings with query params.
+There is a little [helper function](./src/entry.js) for defining entry modules,
+which makes it a bit more readable than using plain strings with query params.
 
 
 [webpack.config.babel.js](./examples/webpack.config.babel.js):
@@ -39,11 +39,12 @@ export default ()=> ({
 The loader expects a JS module that has a react component as the default export.
 This component is a mix of template and entry module code.
 
-[./src/page1.js](./examples/page1.js):
+[./examples/page1.js](./examples/page1.js):
 ```js
 import React from 'react';
 
-import {Renderer, Styles, Scripts} from 'react-entry-loader/injectors';
+import {render} from 'react-entry-loader/render';
+import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
 
 import App from './app';
 import theme from './page1.css';
@@ -52,14 +53,16 @@ import theme from './page1.css';
 const Html = ({scripts, styles})=> (
   <html>
     <head>
-      <title>Page 1</title>
+      <title>react-entry-loader</title>
       <Styles files={styles} />
       <Scripts files={scripts} async />
     </head>
-    <body className={theme.body}>
-      <Renderer id="page1-app" className={theme.root}>
-        <App />
-      </Renderer>
+    <body>
+      <div id="page1-app" className={theme.root}>
+        <Module onLoad={render('page1-app')}>
+          <App theme={theme} />
+        </Module>
+      </div>
     </body>
   </html>
 );
@@ -67,24 +70,62 @@ const Html = ({scripts, styles})=> (
 export default Html;
 ```
 
-The child component of the `<Renderer>` and any code that child depends on
-is treated as the webpack entry module code.
+The child components of `<Module onLoad={...}>` and any code that they depend on
+is treated as the webpack entry module code, as is the code being called in `onLoad={some-render-or-init-function}`.
 
-The entry module code will be extracted and some render boiler plate is added so
-that the component will be rendered it into the DOM element created by `<Renderer>`.
+The entry module code will be extracted along with the `some-render-or-init-function`.
+The latter should be a function with the interface `render(...children)` that
+renders the `children` into the DOM at run-time.
+You can use [react-entry-loader/render](./src/render)'s `render(elementId)` or `hydrate(elementId)` render function factories for this or write your own.
 
-The template is everything left over after the child component has been removed.
+Extracted Entry Module:
+```js
+import React from 'react';
+import {render} from 'react-entry-loader/render';
+import App from './app';
+import theme from './page1.css';
+render('page1-app')(<App theme={theme} />);
+```
+
+The template code is everything left over after the child components and `some-render-or-init-function` code has been removed.
+
+
+Extracted Template:
+```js
+import React from 'react';
+import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+import theme from './page1.css';
+
+const Html = ({scripts, styles})=> (
+  <html>
+    <head>
+      <title>Page 1</title>
+      <Styles files={styles} />
+      <Scripts files={scripts} async />
+    </head>
+    <body>
+      <div id="page1-app" className={theme.root}>
+        <Module />
+      </div>
+    </body>
+  </html>
+);
+export default Html;
+```
+
+Note when using `<Module hydratable ... />` the child components and their
+dependencies will be left in place for compile time rendering.
 
 The loader will return the entry module code to webpack and will
 send the extracted template code to the [ReactEntryLoaderPlugin](./src/plugin.js).
 
-The plugin will render the template at the end of the webpack compilation
-to generate an HTML asset.
+The plugin will render every entry module's template at the end of
+the webpack compilation process to generate HTML assets.
 
-It will pass `scripts` and `styles` that the entry module depends on as
-props to the template. These can then be passed to the `<Scripts>` and `<Styles>`
-components that come with the [injectors](./src/injectors) module to include the
-files in generated HTML.
+The final chunks that an entry module depends on will be passed as
+`scripts` and `styles` props to the template components.
+These can then be passed to the `<Scripts>` and `<Styles>` components that come
+with the [injectors](./src/injectors) module to reference the files in generated HTML.
 
 
 ## Running the Examples

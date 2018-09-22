@@ -1,7 +1,7 @@
 /* eslint-env node */
 import vm from 'vm';
 import Module from 'module';
-import {dirname, join} from 'path';
+import {dirname} from 'path';
 
 import {transform} from '@babel/core';
 import React from 'react';
@@ -11,8 +11,8 @@ import ReactDomServer from 'react-dom/server';
 const getRequire = (parentContext, compilation, exec)=> (req)=> {
   // TODO: needed for tests to be able to import react-entry-loader
   // should find a better way to handle this, e.g. using webpack's resolver
-  if (req === 'react-entry-loader/injectors') {
-    req = join(__dirname, 'injectors');
+  if (req.startsWith('react-entry-loader/')) {
+    req = req.replace('react-entry-loader', __dirname);
   }
 
   // TODO: should use webpack's resolver
@@ -61,7 +61,8 @@ const exec = (context, filename, source, compilation)=> {
 const getRunner = (compilation)=> async (filename, context, {code}, props)=> {
   const Html = exec(context, filename, code, compilation).default;
 
-  const html = ReactDomServer.renderToStaticMarkup(
+  // TODO: should we only renderToString if module component was hydratable?
+  const html = ReactDomServer.renderToString(
     React.createElement(Html, props)
   );
   return `<!DOCTYPE html>${html}`;
