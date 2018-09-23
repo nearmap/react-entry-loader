@@ -8,10 +8,10 @@ import App from './app';
 import GeneratedCode from './code-gen';
 
 
-const Html = ({scripts, styles})=> (
+const Html = ({scripts, styles, title})=> (
   <html>
     <head>
-      <title>react-entry-loader</title>
+      <title>{title}</title>
       <Styles files={styles} />
       <Scripts files={scripts} async />
     </head>

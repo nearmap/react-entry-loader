@@ -27,8 +27,12 @@ describe('loader and plugin', ()=> {
     const stats = await webpack({
       ...testConfig,
       entry: {
-        page1: reactEntry({output: 'page1.html'})('../examples/page1.js'),
-        page2: reactEntry({output: 'page2.html'})('../examples/page2.js')
+        page1: reactEntry(
+          {output: 'page1.html', title: 'react-entry-loader - page 1'}
+        )('../examples/page1.js'),
+        page2: reactEntry(
+          {output: 'page2.html', title: 'react-entry-loader - page 2'}
+        )('../examples/page2.js')
       }
     });
 
@@ -40,7 +44,7 @@ describe('loader and plugin', ()=> {
       <!DOCTYPE html>
       <html data-reactroot="">
         <head>
-          <title>react-entry-loader</title>
+          <title>react-entry-loader - page 1</title>
           <link href="shared.css" rel="stylesheet"/>
           <script type="text/javascript" src="runtime.js" async=""></script>
           <script type="text/javascript" src="shared.js" async=""></script>
@@ -57,7 +61,7 @@ describe('loader and plugin', ()=> {
       <!DOCTYPE html>
       <html data-reactroot="">
         <head>
-          <title>react-entry-loader</title>
+          <title>react-entry-loader - page 2</title>
           <link href="shared.css" rel="stylesheet"/>
         </head>
         <body>

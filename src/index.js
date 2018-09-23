@@ -5,11 +5,11 @@ import {getModule, getTemplate} from './code-split';
 
 
 const createLoader = (loaderCtx)=> async (source, sourceMap, meta)=> {
-  const {output} = getOptions(loaderCtx);
+  const {output, ...props} = getOptions(loaderCtx);
 
   const template = getTemplate(source, sourceMap);
 
-  getTemplateHandler(loaderCtx)({output, template});
+  getTemplateHandler(loaderCtx)({output, template, props});
 
   const {code, map} = getModule(source, sourceMap);
   return [code, map, meta];
@@ -32,19 +32,17 @@ const createLoader = (loaderCtx)=> async (source, sourceMap, meta)=> {
  * Options:
  *   * output - The asset to generate from the template code provided
  *              by the file being loaded.
+ *   * ...props - The props sent to the template component during rendering.
  *
- * This loader handles any JS `source` that exports a react component as
+ * This loader handles any JS `source` that exports a React component
  * as default.
  * It splits the code into two part: the module and the template code.
  * Only the module code will be returned, while the template code is
- * sent to the `react-entry-loader/plugin` for generating a HTML asset.
+ * sent to the `react-entry-loader/plugin` for generating an HTML asset.
  *
- * Code splitting is done by searching for a child of the `<Renderer />`
- * component in the `source`. That child and all of it's dependencies are
+ * Code splitting is done by searching for a children of the `<Module />`
+ * component in the `source`. Those children and all of it's dependencies are
  * assumed to be module code. The rest is template code.
- *
- * The module code will add a wrapper around the extracted child for it to
- * be rendered in place of the `<Renderer />` at runtime.
  */
 export default async function(source, sourceMap, sourceMmeta) {
   // eslint-disable-next-line no-invalid-this, consistent-this
