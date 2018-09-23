@@ -18,6 +18,8 @@ webpack config to handle the HTML asset generation.
 The loader itself can be used like any other loader in webpack.
 There is a little [helper function](./src/entry.js) for defining entry modules,
 which makes it a bit more readable than using plain strings with query params.
+All options that is are not a loader option are interpreted as template props.
+They will be forwarded to the template during compile time.
 
 
 [webpack.config.babel.js](./examples/webpack.config.babel.js):
@@ -27,7 +29,7 @@ import reactEntry from 'react-entry-loader/entry';
 
 export default ()=> ({
   entry: {
-    page1: reactEntry({output: 'page1.html'})('./src/page1.js'),
+    page1: reactEntry({output: 'page1.html', title: 'test'})('./src/page1.js'),
     page2: 'react-entry-loader?output=page2.html!./src/page2.js'
   },
   plugins: {
@@ -36,7 +38,7 @@ export default ()=> ({
 });
 ```
 
-The loader expects a JS module that has a react component as the default export.
+The loader expects a JS module that has a React component as the default export.
 This component is a mix of template and entry module code.
 
 [./examples/page1.js](./examples/page1.js):
@@ -50,10 +52,10 @@ import App from './app';
 import theme from './page1.css';
 
 
-const Html = ({scripts, styles})=> (
+const Html = ({scripts, styles, title})=> (
   <html>
     <head>
-      <title>react-entry-loader</title>
+      <title>{title}</title>
       <Styles files={styles} />
       <Scripts files={scripts} async />
     </head>
@@ -96,10 +98,10 @@ import React from 'react';
 import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
 import theme from './page1.css';
 
-const Html = ({scripts, styles})=> (
+const Html = ({scripts, styles, title})=> (
   <html>
     <head>
-      <title>Page 1</title>
+      <title>{title}</title>
       <Styles files={styles} />
       <Scripts files={scripts} async />
     </head>

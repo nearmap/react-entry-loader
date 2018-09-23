@@ -62,14 +62,14 @@ function* entryModules(compilation) {
 
 
 /**
- * Yield all `[entry, template]` items for every entry module
- * for which a loader has sent this plugin a template.
+ * Yield all `[entry, loaderData]` items for every entry module
+ * for which a loader has sent this plugin a data.
  */
 function* findEntries(compilation) {
   for (const [entry, entryModule] of entryModules(compilation)) {
-    const template = getLoaderData(entryModule);
-    if (template) {
-      yield [entry, entryModule, template];
+    const loaderData = getLoaderData(entryModule);
+    if (loaderData) {
+      yield [entry, entryModule, loaderData];
     }
   }
 }
@@ -82,11 +82,13 @@ function* findEntries(compilation) {
 const addHtmlAssets = (compilation)=> async ()=> {
   const genHtml = getTemplateRunner(compilation);
 
-  for (const [entry, module, {output, template}] of findEntries(compilation)) {
+  for (const [entry, module, loaderData] of findEntries(compilation)) {
+    const {output, template, props} = loaderData;
     const {scripts, styles} = getFiles(entry);
     const {resource, context} = module;
 
-    const html = await genHtml(resource, context, template, {scripts, styles});
+    const templateProps = {...props, scripts, styles};
+    const html = await genHtml(resource, context, template, templateProps);
 
     compilation.assets[output] = {
       source: ()=> html,
@@ -103,7 +105,7 @@ const addHtmlAssets = (compilation)=> async ()=> {
  * to this plugin.
  */
 const registerModuleLoaderCallback = (loaderCtx, module)=> {
-  setTemplateHandler(loaderCtx, (template)=> setLoaderData(module, template));
+  setTemplateHandler(loaderCtx, (data)=> setLoaderData(module, data));
 };
 
 
