@@ -11,6 +11,11 @@ export default {
       'react-entry-loader': join(packageDir, 'src')
     }
   },
+  resolve: {
+    alias: {
+      'react-entry-loader': join(packageDir, 'src')
+    }
+  },
   output: {
     path: join(packageDir, 'build'),
     filename: '[name].js'

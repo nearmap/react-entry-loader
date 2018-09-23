@@ -1,23 +1,29 @@
+/* eslint-env node */
 import React from 'react';
 
-import {Renderer, Styles, Scripts} from 'react-entry-loader/injectors';
+import {hydrate} from 'react-entry-loader/render';
+import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
 
-import Header from './header';
 import App from './app';
+import GeneratedCode from './code-gen';
 
 
 const Html = ({scripts, styles})=> (
   <html>
     <head>
-      <title>Page 2</title>
+      <title>react-entry-loader</title>
       <Styles files={styles} />
-      <Scripts files={scripts} />
     </head>
     <body>
-      <Header page={2} />
-      <Renderer id="page2-app">
-        <App />
-      </Renderer>
+      <div id="page2-app">
+        <Module hydratable onLoad={hydrate('page2-app')}>
+          <App page={2} />
+        </Module>
+      </div>
+
+      <Scripts files={scripts} />
+
+      <GeneratedCode filename={__filename} />
     </body>
   </html>
 );

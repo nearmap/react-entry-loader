@@ -10,8 +10,8 @@ import devConfig from '../src/testing/webpack.config.js';
 export default ()=> ({
   ...devConfig,
   entry: {
-    page1: reactEntry({output: 'page1.html'})('./page1.js'),
-    page2: reactEntry({output: 'page2.html'})('./page2.js')
+    renderedApp: reactEntry({output: 'page1.html'})('./page1.js'),
+    hydratedApp: reactEntry({output: 'page2.html'})('./page2.js')
   },
   plugins: [
     new ReactEntryLoaderPlugin(),

@@ -1,22 +1,28 @@
+/* eslint-env node */
 import React from 'react';
 
-import {Renderer, Styles, Scripts} from 'react-entry-loader/injectors';
+import {render} from 'react-entry-loader/render';
+import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
 
 import App from './app';
-import theme from './page1.css';
+import GeneratedCode from './code-gen';
 
 
 const Html = ({scripts, styles})=> (
   <html>
     <head>
-      <title>Page 1</title>
+      <title>react-entry-loader</title>
       <Styles files={styles} />
-      <Scripts files={scripts} />
+      <Scripts files={scripts} async />
     </head>
-    <body className={theme.body}>
-      <Renderer id="page1-app">
-        <App theme={theme} />
-      </Renderer>
+    <body>
+      <div id="page1-app">
+        <Module onLoad={render('page1-app')}>
+          <App page="1" />
+        </Module>
+      </div>
+
+      <GeneratedCode filename={__filename} />
     </body>
   </html>
 );
