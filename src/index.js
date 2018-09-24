@@ -8,7 +8,7 @@ const createLoader = (loaderCtx)=> async (source, sourceMap, meta)=> {
   const {output, ...props} = getOptions(loaderCtx);
 
   const template = getTemplate(source, sourceMap);
-
+  // TODO: add all file dependencies to weback to ensure rebuilds upon changes
   getTemplateHandler(loaderCtx)({output, template, props});
 
   const {code, map} = getModule(source, sourceMap);

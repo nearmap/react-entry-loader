@@ -1,4 +1,4 @@
-import {parse} from '@babel/parser';
+import {parse} from '@babel/core';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
 import {callExpression, expressionStatement} from '@babel/types';
@@ -200,8 +200,16 @@ const isHydratable = (hydratablePropPath)=> (
 );
 
 
-export const getModule = (source)=> {
-  const ast = parse(source, {sourceType: 'module'});
+const getAst = (source, inputSourceMap)=> (
+  parse(source, {
+    sourceType: 'module',
+    inputSourceMap
+  })
+);
+
+
+export const getModule = (source, sourceMap)=> {
+  const ast = getAst(source, sourceMap);
 
   const moduleComponent = getModuleComponent(ast);
   const {onLoad, children} = getProps(moduleComponent);
@@ -219,8 +227,8 @@ export const getModule = (source)=> {
 };
 
 
-export const getTemplate = (source)=> {
-  const ast = parse(source, {sourceType: 'module'});
+export const getTemplate = (source, sourceMap)=> {
+  const ast = getAst(source, sourceMap);
 
   const moduleComponent = getModuleComponent(ast);
   const {onLoad, hydratable, children} = getProps(moduleComponent);

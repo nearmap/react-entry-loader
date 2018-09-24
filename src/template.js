@@ -34,7 +34,9 @@ const getRequire = (parentContext, compilation, exec)=> (req)=> {
 
 
 const exec = (context, filename, source, compilation)=> {
-  const {code} = transform(source);
+  // we need to transform import and export statements that might be
+  // used in webpack compiled modules
+  const {code} = transform(source, {filename});
 
   const module = {exports: {}};
 
