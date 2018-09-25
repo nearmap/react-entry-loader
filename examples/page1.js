@@ -12,6 +12,10 @@ const Html = ({scripts, styles, title})=> (
   <html>
     <head>
       <title>{title}</title>
+      <meta
+        httpEquiv="Content-Security-Policy"
+        content="default-src 'self';"
+      />
       <Styles files={styles} />
       <Scripts files={scripts} async />
     </head>

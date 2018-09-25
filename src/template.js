@@ -7,6 +7,14 @@ import {transform} from '@babel/core';
 import React from 'react';
 import ReactDomServer from 'react-dom/server';
 
+// TODO: Workaround for un-escaping characters that should appear as is in HTML.
+const sanitize = (html)=> (
+  // un-escape `'` that is required in CSP meta tags.
+  html.replace(
+    /(<meta .+?"Content-Security-Policy".+?content=")(.+?)(".*?\/>)/g,
+    (_, start, policy, end)=> `${start}${policy.replace(/&#x27;/g, "'")}${end}`
+  )
+);
 
 const getRequire = (parentContext, compilation, exec)=> (req)=> {
   // TODO: needed for tests to be able to import react-entry-loader
@@ -67,7 +75,7 @@ const getRunner = (compilation)=> async (filename, context, {code}, props)=> {
   const html = ReactDomServer.renderToString(
     React.createElement(Html, props)
   );
-  return `<!DOCTYPE html>${html}`;
+  return sanitize(`<!DOCTYPE html>${html}`);
 };
 
 export default getRunner;

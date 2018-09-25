@@ -45,6 +45,10 @@ describe('loader and plugin', ()=> {
       <html data-reactroot="">
         <head>
           <title>react-entry-loader - page 1</title>
+          <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self';"
+          />
           <link href="shared.css" rel="stylesheet"/>
           <script type="text/javascript" src="runtime.js" async=""></script>
           <script type="text/javascript" src="shared.js" async=""></script>
