@@ -110,13 +110,20 @@ function* getDependentPaths(...paths) {
 
 /**
  * Remove the `path` and its parents.
- * Only remove parent `ImportDeclarations` if `path` is the last
+ * Only remove parent `ImportDeclaration`s if `path` is the last
  * `ImportSpecifier`.
+ * Only remove parent `VariableDeclaration`s if `path` is the last
+ * `Variable`.
  */
 const removePathAndMaybeParent = (path)=> {
   const {parentPath} = path;
 
   if (isAnyImportSpecifier(path) && parentPath.node.specifiers.length > 1) {
+    path.remove();
+    return;
+  }
+
+  if (path.isVariableDeclarator() && parentPath.node.declarations.length > 1) {
     path.remove();
     return;
   }

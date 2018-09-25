@@ -27,7 +27,6 @@ describe('App rendered at runtime', ()=> {
 
     const foo = 'needed by app';
 
-
     const Html = ({scripts, styles})=> (
       <html>
         <head>
@@ -222,6 +221,29 @@ describe('no child to render', ()=> {
       );
 
       export default Html;
+    `);
+  });
+});
+
+
+describe('path removal issues', ()=> {
+  it('removes variable declarations only if they would be empty', ()=> {
+    const {code} = getModule(jsx`
+      import React from 'react';
+      import {Module, Scripts} from 'react-entry-loader/injectors';
+
+      const foo = 1, bar = '2';
+
+      const Html = ({scripts})=> (
+        <Module onLoad={()=> foo} />
+      );
+
+      export default Html;
+    `);
+
+    expect(code).toBe(jsx`
+      const foo = 1;
+      (() => foo)();
     `);
   });
 });
