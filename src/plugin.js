@@ -34,42 +34,41 @@ const getFiles = (entry)=> {
 };
 
 
-/**
- * Yield all entry modules and their dependencies modules.
- */
-function* chunksEntryModules(chunks) {
-  for (const {entryModule} of chunks) {
-    if (entryModule) {
-      yield entryModule;
-      for (const {module} of entryModule.dependencies) {
-        yield module;
-      }
+function* getDependencies(parentModule, processed=new Set()) {
+  if (!parentModule || processed.has(parentModule)) {
+    return;
+  }
+
+  processed.add(parentModule);
+  yield parentModule;
+
+  for (const {module} of parentModule.dependencies) {
+    // TODO: find test to deal with non-module dependencies
+    /* istanbul ignore else */
+    if (module) {
+      yield * getDependencies(module.rootModule || module, processed);
     }
   }
 }
 
 
-/**
- * Yield all entry modules from the `compilation`.
- */
-function* entryModules(compilation) {
-  for (const [, entry] of compilation.entrypoints.entries()) {
-    for (const module of chunksEntryModules(entry.chunks)) {
-      yield [entry, module];
+function* chunkEntryModules(compilation) {
+  for (const entry of compilation.entrypoints.values()) {
+    for (const {entryModule} of entry.chunks) {
+      yield [entry, entryModule];
     }
   }
 }
 
 
-/**
- * Yield all `[entry, loaderData]` items for every entry module
- * for which a loader has sent this plugin a data.
- */
 function* findEntries(compilation) {
-  for (const [entry, entryModule] of entryModules(compilation)) {
-    const loaderData = getLoaderData(entryModule);
-    if (loaderData) {
-      yield [entry, entryModule, loaderData];
+  for (const [entry, entryModule] of chunkEntryModules(compilation)) {
+    for (const module of getDependencies(entryModule)) {
+      const data = getLoaderData(module);
+      if (data) {
+        yield [entry, module, data];
+        break;
+      }
     }
   }
 }

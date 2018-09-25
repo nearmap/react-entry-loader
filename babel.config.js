@@ -7,7 +7,6 @@ module.exports = {
   env: {
     // Used as the default for running babel
     development: {
-      sourceMaps: 'both',
       presets: [
         ['@babel/preset-env', {
           targets: {
