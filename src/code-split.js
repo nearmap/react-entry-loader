@@ -207,10 +207,10 @@ const isHydratable = (hydratablePropPath)=> (
 );
 
 
-const getAst = (source, inputSourceMap)=> (
+const getAst = (source, sourceMap)=> (
   parse(source, {
     sourceType: 'module',
-    inputSourceMap
+    inputSourceMap: sourceMap || false
   })
 );
 
