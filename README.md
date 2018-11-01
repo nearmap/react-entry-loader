@@ -1,5 +1,7 @@
 # react-entry-loader
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/nearmap/react-entry-loader.svg)](https://greenkeeper.io/)
+
 Use webpack entry modules as templates for generating HTML assets.
 
 
