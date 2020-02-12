@@ -248,5 +248,5 @@ export const getTemplate = (source, sourceMap)=> {
     removePaths(...children);
   }
 
-  return generate(ast, {sourceMaps: true}, source);
+  return generate(ast, {sourceMaps: false}, source);
 };
