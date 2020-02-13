@@ -1,14 +1,12 @@
-# react-entry-loader
+# @nearmap/react-entry-loader
 
 Use webpack entry modules as templates for generating HTML assets.
-
 
 ## Installation
 
 ```bash
 npm install --save-dev react-entry-loader
 ```
-
 
 ## Usage
 
@@ -21,8 +19,8 @@ which makes it a bit more readable than using plain strings with query params.
 All options that is are not a loader option are interpreted as template props.
 They will be forwarded to the template during compile time.
 
-
 [webpack.config.babel.js](./examples/webpack.config.babel.js):
+
 ```js
 import ReactEntryLoaderPlugin from 'react-entry-loader/plugin';
 import reactEntry from 'react-entry-loader/entry';
@@ -42,17 +40,17 @@ The loader expects a JS module that has a React component as the default export.
 This component is a mix of template and entry module code.
 
 [./examples/page1.js](./examples/page1.js):
+
 ```js
-import React from 'react';
+import React from "react";
 
-import {render} from 'react-entry-loader/render';
-import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+import { render } from "react-entry-loader/render";
+import { Module, Styles, Scripts } from "react-entry-loader/injectors";
 
-import App from './app';
-import theme from './page1.css';
+import App from "./app";
+import theme from "./page1.css";
 
-
-const Html = ({scripts, styles, title})=> (
+const Html = ({ scripts, styles, title }) => (
   <html>
     <head>
       <title>{title}</title>
@@ -61,7 +59,7 @@ const Html = ({scripts, styles, title})=> (
     </head>
     <body>
       <div id="page1-app" className={theme.root}>
-        <Module onLoad={render('page1-app')}>
+        <Module onLoad={render("page1-app")}>
           <App theme={theme} />
         </Module>
       </div>
@@ -81,24 +79,25 @@ renders the `children` into the DOM at run-time.
 You can use [react-entry-loader/render](./src/render.js)'s `render(elementId)` or `hydrate(elementId)` render function factories for this or write your own.
 
 Extracted Entry Module:
+
 ```js
-import React from 'react';
-import {render} from 'react-entry-loader/render';
-import App from './app';
-import theme from './page1.css';
-render('page1-app')(<App theme={theme} />);
+import React from "react";
+import { render } from "react-entry-loader/render";
+import App from "./app";
+import theme from "./page1.css";
+render("page1-app")(<App theme={theme} />);
 ```
 
 The template code is everything left over after the child components and `some-render-or-init-function` code has been removed.
 
-
 Extracted Template:
-```js
-import React from 'react';
-import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
-import theme from './page1.css';
 
-const Html = ({scripts, styles, title})=> (
+```js
+import React from "react";
+import { Module, Styles, Scripts } from "react-entry-loader/injectors";
+import theme from "./page1.css";
+
+const Html = ({ scripts, styles, title }) => (
   <html>
     <head>
       <title>{title}</title>
@@ -128,7 +127,6 @@ The final chunks that an entry module depends on will be passed as
 `scripts` and `styles` props to the template components.
 These can then be passed to the `<Scripts>` and `<Styles>` components that come
 with the [injectors](./src/injectors.js) module to reference the files in generated HTML.
-
 
 ## Running the Examples
 
