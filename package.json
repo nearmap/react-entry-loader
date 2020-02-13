@@ -1,5 +1,5 @@
 {
-  "name": "react-entry-loader",
+  "name": "@nearmap/react-entry-loader",
   "description": "Use a webpack entry module as a template to generate HTML assets.",
   "keywords": [
     "webpack",
