@@ -1,8 +1,8 @@
 /* eslint-env node */
 import React from 'react';
 
-import {render} from 'react-entry-loader/render';
-import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+import {render} from '@nearmap/react-entry-loader/render';
+import {Module, Styles, Scripts} from '@nearmap/react-entry-loader/injectors';
 
 import App from './app';
 import GeneratedCode from './code-gen';

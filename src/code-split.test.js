@@ -19,8 +19,12 @@ describe('App rendered at runtime', ()=> {
 
   const entry = jsx`
     import React from 'react';
-    import render from 'react-entry-loader/render';
-    import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+    import render from '@nearmap/react-entry-loader/render';
+    import {
+      Module,
+      Styles,
+      Scripts
+    } from '@nearmap/react-entry-loader/injectors';
 
     import App from './app';
     import {theme} from './app.css';
@@ -53,7 +57,7 @@ describe('App rendered at runtime', ()=> {
 
     expect(code).toBe(jsx`
       import React from 'react';
-      import render from 'react-entry-loader/render';
+      import render from '@nearmap/react-entry-loader/render';
       import App from './app';
       import {theme} from './app.css';
       const foo = 'needed by app';
@@ -69,7 +73,11 @@ describe('App rendered at runtime', ()=> {
     expect(code).toBe(jsx`
       import React from 'react';
 
-      import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+      import {
+        Module,
+        Styles,
+        Scripts
+      } from '@nearmap/react-entry-loader/injectors';
 
       const Html = ({scripts, styles})=> (
         <html>
@@ -96,8 +104,12 @@ describe('App rendered at compile time and hydrated at runtiume', ()=> {
 
   const entry = jsx`
     import React from 'react';
-    import {hydrate} from 'react-entry-loader/render';
-    import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+    import {hydrate} from '@nearmap/react-entry-loader/render';
+    import {
+      Module,
+      Styles,
+      Scripts
+    } from '@nearmap/react-entry-loader/injectors';
 
     import App from './app';
 
@@ -127,7 +139,7 @@ describe('App rendered at compile time and hydrated at runtiume', ()=> {
 
     expect(code).toBe(jsx`
       import React from 'react';
-      import {hydrate} from 'react-entry-loader/render';
+      import {hydrate} from '@nearmap/react-entry-loader/render';
       import App from './app';
 
       hydrate('test-app')(<App />);
@@ -140,7 +152,11 @@ describe('App rendered at compile time and hydrated at runtiume', ()=> {
 
     expect(code).toBe(jsx`
       import React from 'react';
-      import {Module, Styles, Scripts} from 'react-entry-loader/injectors';
+      import {
+        Module,
+        Styles,
+        Scripts
+      } from '@nearmap/react-entry-loader/injectors';
 
       import App from './app';
 
@@ -171,7 +187,7 @@ describe('no child to render', ()=> {
 
   const entry = jsx`
     import React from 'react';
-    import {Module, Scripts} from 'react-entry-loader/injectors';
+    import {Module, Scripts} from '@nearmap/react-entry-loader/injectors';
 
     import {signingSilent} from './silent-signing';
 
@@ -206,7 +222,7 @@ describe('no child to render', ()=> {
 
     expect(code).toBe(jsx`
       import React from 'react';
-      import {Module, Scripts} from 'react-entry-loader/injectors';
+      import {Module, Scripts} from '@nearmap/react-entry-loader/injectors';
 
       const Html = ({scripts})=> (
         <html>
@@ -230,7 +246,7 @@ describe('path removal issues', ()=> {
   it('removes variable declarations only if they would be empty', ()=> {
     const {code} = getModule(jsx`
       import React from 'react';
-      import {Module, Scripts} from 'react-entry-loader/injectors';
+      import {Module, Scripts} from '@nearmap/react-entry-loader/injectors';
 
       const foo = 1, bar = '2';
 

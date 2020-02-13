@@ -19,8 +19,8 @@ const sanitize = (html)=> (
 const getRequire = (parentContext, compilation, exec)=> (req)=> {
   // TODO: needed for tests to be able to import react-entry-loader
   // should find a better way to handle this, e.g. using webpack's resolver
-  if (req.startsWith('react-entry-loader/')) {
-    req = req.replace('react-entry-loader', __dirname);
+  if (req.startsWith('@nearmap/react-entry-loader/')) {
+    req = req.replace('@nearmap/react-entry-loader', __dirname);
   }
 
   // TODO: should use webpack's resolver

@@ -8,12 +8,12 @@ export default {
   mode: 'development',
   resolveLoader: {
     alias: {
-      'react-entry-loader': join(packageDir, 'src')
+      '@nearmap/react-entry-loader': join(packageDir, 'src')
     }
   },
   resolve: {
     alias: {
-      'react-entry-loader': join(packageDir, 'src')
+      '@nearmap/react-entry-loader': join(packageDir, 'src')
     }
   },
   output: {

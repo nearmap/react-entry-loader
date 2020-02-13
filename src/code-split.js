@@ -46,7 +46,10 @@ const isModuleComponent = (path)=> {
   /* istanbul ignore else  */
   if (isReactCreateComponent(path)) {
     const [comp] = path.get('arguments');
-    return comp.referencesImport('react-entry-loader/injectors', 'Module');
+    return comp.referencesImport(
+      '@nearmap/react-entry-loader/injectors',
+      'Module'
+    );
   }
   // TODO: we somehow never get here, maybe because we stop traversal
   // when we have found the module component.

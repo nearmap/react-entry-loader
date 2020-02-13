@@ -23,7 +23,7 @@ const createLoader = (loaderCtx)=> async (source, sourceMap, meta)=> {
  * ```javascript
  * {
  *   entry: {
- *    page1: 'react-entry-loader?output=page1.html!./src/page1.js'
+ *    page1: '@nearmap/react-entry-loader?output=page1.html!./src/page1.js'
  *   }
  *   ...
  * }
@@ -38,7 +38,8 @@ const createLoader = (loaderCtx)=> async (source, sourceMap, meta)=> {
  * as default.
  * It splits the code into two part: the module and the template code.
  * Only the module code will be returned, while the template code is
- * sent to the `react-entry-loader/plugin` for generating an HTML asset.
+ * sent to the `@nearmap/react-entry-loader/plugin` for generating an
+ * HTML asset.
  *
  * Code splitting is done by searching for a children of the `<Module />`
  * component in the `source`. Those children and all of it's dependencies are

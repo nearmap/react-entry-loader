@@ -8,7 +8,7 @@
  *   * ...props - Props to be sent to the template component in `src`.
  */
 const reactEntryLoader = (options)=> (src)=> (
-  `react-entry-loader?${JSON.stringify(options)}!${src}`
+  `@nearmap/react-entry-loader?${JSON.stringify(options)}!${src}`
 );
 
 export default reactEntryLoader;
