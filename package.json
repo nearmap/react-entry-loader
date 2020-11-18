@@ -64,7 +64,7 @@
     "remark-cli": "^5.0.0",
     "remark-lint": "^6.0.2",
     "rimraf": "^2.6.2",
-    "semantic-release": "^15.9.14",
+    "semantic-release": "^17.2.3",
     "webpack": "^4.20.0",
     "webpack-cli": "^3.1.1",
     "webpack-dev-server": "^3.1.9"
